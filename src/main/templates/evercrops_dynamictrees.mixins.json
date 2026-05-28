@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "mod.gottsch.neo.evercrops.dynamictrees.core.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "refmap": "evercrops_dynamictrees.refmap.json",
+  "mixins": [
+    "SaplingBlockMixin",
+    "SoilBlockMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
