@@ -1,0 +1,10 @@
+{
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/evercrops-dynamic-trees",
+    "promos": {
+    "1.21.1-latest": "1.0.0",
+    "1.21.1-recommended": "1.0.0"
+  },
+    "1.21.1": {
+      "1.1.0": "See https://raw.githubusercontent.com/gottsch/gottsch-minecraft-neoforge-EverCrops-Dynamic-Trees/neoforge-1.21.1-main/CHANGELOG.md"
+    }
+}

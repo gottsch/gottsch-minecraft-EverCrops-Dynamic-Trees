@@ -1,0 +1,46 @@
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
+license="${mod_license}"
+
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
+# A URL to refer people to when problems occur with this mod
+issueTrackerURL="https://github.com/gottsch/gottsch-minecraft-EverCrops-Dynamic-Trees/issues" #optional
+updateJSONURL="https://raw.githubusercontent.com/gottsch/gottsch-minecraft-EverCrops-Dynamic-Trees/neoforge-1.21.1-main/update.json"
+displayURL="https://www.curseforge.com/minecraft/mc-mods/evercrops-dynamic-trees"
+logoFile="evercrops_logo.png"
+authors="${mod_authors}"
+description='''${mod_description}'''
+
+[[mixins]]
+config="${mod_id}.mixins.json"
+
+[[dependencies.${mod_id}]]
+    modId="neoforge"
+    type="required"
+    versionRange="${neo_version_range}"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="minecraft"
+    type="required"
+    versionRange="${minecraft_version_range}"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="evercrops"
+    type="required"
+    versionRange="${evercrops_version_range}"
+    ordering="BEFORE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="dynamictrees"
+    type="required"
+    versionRange="${dt_version_range}"
+    ordering="BEFORE"
+    side="BOTH"
