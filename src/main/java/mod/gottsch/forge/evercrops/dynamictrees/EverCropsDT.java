@@ -15,12 +15,12 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with EverCrops: Dynamic Trees.  If not, see <http://www.gnu.org/licenses/lgpl>.
  */
-package mod.gottsch.neo.evercrops.dynamictrees;
+package mod.gottsch.forge.evercrops.dynamictrees;
 
-import mod.gottsch.neo.evercrops.dynamictrees.core.config.Config;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.common.Mod;
+import mod.gottsch.forge.evercrops.dynamictrees.core.config.Config;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -34,7 +34,8 @@ public class EverCropsDT {
 
     public static final String MOD_ID = "evercrops_dynamictrees";
 
-    public EverCropsDT(IEventBus modEventBus, ModContainer modContainer) {
-        Config.register(modContainer);
+    public EverCropsDT() {
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        Config.register();
     }
 }

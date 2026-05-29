@@ -15,11 +15,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with EverCrops: Dynamic Trees.  If not, see <http://www.gnu.org/licenses/lgpl>.
  */
-package mod.gottsch.neo.evercrops.dynamictrees.core.persistence;
+package mod.gottsch.forge.evercrops.dynamictrees.core.persistence;
 
-import com.dtteam.dynamictrees.block.soil.SoilBlock;
+import com.ferreusveritas.dynamictrees.block.rooty.RootyBlock;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -57,7 +56,8 @@ public class TreeSavedData extends SavedData {
 
     public static TreeSavedData getOrCreate(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(
-                new SavedData.Factory<>(TreeSavedData::new, TreeSavedData::load, null),
+                TreeSavedData::load,
+                TreeSavedData::new,
                 DATA_NAME
         );
     }
@@ -66,7 +66,7 @@ public class TreeSavedData extends SavedData {
     // Serialization
     // -------------------------------------------------
 
-    public static TreeSavedData load(CompoundTag tag, HolderLookup.Provider registries) {
+    public static TreeSavedData load(CompoundTag tag) {
         TreeSavedData data = new TreeSavedData();
         ListTag list = tag.getList("trees", Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
@@ -81,7 +81,7 @@ public class TreeSavedData extends SavedData {
     }
 
     @Override
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+    public CompoundTag save(CompoundTag tag) {
         ListTag list = new ListTag();
         for (Map.Entry<Long, TreeState> entry : trees.entrySet()) {
             CompoundTag e = new CompoundTag();
@@ -173,7 +173,7 @@ public class TreeSavedData extends SavedData {
         for (long packedPos : trees.keySet()) {
             BlockPos pos = BlockPos.of(packedPos);
             if (!level.isLoaded(pos)) continue; // skip — can't confirm without loading chunk
-            if (!(level.getBlockState(pos).getBlock() instanceof SoilBlock)) {
+            if (!(level.getBlockState(pos).getBlock() instanceof RootyBlock)) {
                 toRemove.add(packedPos);
             }
         }

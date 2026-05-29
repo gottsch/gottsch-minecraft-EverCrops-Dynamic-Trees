@@ -15,22 +15,22 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with EverCrops: Dynamic Trees.  If not, see <http://www.gnu.org/licenses/lgpl>.
  */
-package mod.gottsch.neo.evercrops.dynamictrees.core.event;
+package mod.gottsch.forge.evercrops.dynamictrees.core.event;
 
-import com.dtteam.dynamictrees.block.sapling.DynamicSaplingBlock;
-import com.dtteam.dynamictrees.block.soil.SoilBlock;
-import mod.gottsch.neo.evercrops.dynamictrees.EverCropsDT;
-import mod.gottsch.neo.evercrops.dynamictrees.core.config.Config;
-import mod.gottsch.neo.evercrops.dynamictrees.core.persistence.TreeCatchUp;
-import mod.gottsch.neo.evercrops.dynamictrees.core.persistence.TreeRegistry;
+import com.ferreusveritas.dynamictrees.block.DynamicSaplingBlock;
+import com.ferreusveritas.dynamictrees.block.rooty.RootyBlock;
+import mod.gottsch.forge.evercrops.dynamictrees.EverCropsDT;
+import mod.gottsch.forge.evercrops.dynamictrees.core.config.Config;
+import mod.gottsch.forge.evercrops.dynamictrees.core.persistence.TreeCatchUp;
+import mod.gottsch.forge.evercrops.dynamictrees.core.persistence.TreeRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.level.BlockEvent;
-import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.level.BlockEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 /**
  * Game-bus event listeners for EverCrops: Dynamic Trees.
@@ -43,7 +43,7 @@ import net.neoforged.neoforge.event.tick.LevelTickEvent;
  *
  * @author Mark Gottschling on 2026-05-27
  */
-@EventBusSubscriber(modid = EverCropsDT.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
+@Mod.EventBusSubscriber(modid = EverCropsDT.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ModEvents {
 
     @SubscribeEvent
@@ -78,8 +78,9 @@ public class ModEvents {
      * chunk loads.
      */
     @SubscribeEvent
-    public static void onLevelTick(LevelTickEvent.Post event) {
-        Level level = event.getLevel();
+    public static void onLevelTick(TickEvent.LevelTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) return;
+        Level level = event.level;
         if (level.isClientSide()) return;
         if (!(level instanceof ServerLevel serverLevel)) return;
         if (!Config.SERVER.autoCleanupEnabled.get()) return;
@@ -103,7 +104,7 @@ public class ModEvents {
      * Covers both DynamicSaplingBlock (pre-tree) and SoilBlock (established tree).
      */
     private static boolean isTracked(BlockState state) {
-        return state.getBlock() instanceof SoilBlock
+        return state.getBlock() instanceof RootyBlock
             || state.getBlock() instanceof DynamicSaplingBlock;
     }
 }

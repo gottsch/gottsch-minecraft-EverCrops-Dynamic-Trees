@@ -15,18 +15,18 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with EverCrops: Dynamic Trees.  If not, see <http://www.gnu.org/licenses/lgpl>.
  */
-package mod.gottsch.neo.evercrops.dynamictrees.core.command;
+package mod.gottsch.forge.evercrops.dynamictrees.core.command;
 
-import com.dtteam.dynamictrees.block.sapling.DynamicSaplingBlock;
-import com.dtteam.dynamictrees.block.soil.SoilBlock;
+import com.ferreusveritas.dynamictrees.block.DynamicSaplingBlock;
+import com.ferreusveritas.dynamictrees.block.rooty.RootyBlock;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
-import mod.gottsch.neo.evercrops.dynamictrees.core.config.Config;
-import mod.gottsch.neo.evercrops.dynamictrees.core.persistence.TreeCatchUp;
-import mod.gottsch.neo.evercrops.dynamictrees.core.persistence.TreeRegistry;
-import mod.gottsch.neo.evercrops.dynamictrees.core.persistence.TreeSavedData;
-import mod.gottsch.neo.evercrops.dynamictrees.core.persistence.TreeState;
+import mod.gottsch.forge.evercrops.dynamictrees.core.config.Config;
+import mod.gottsch.forge.evercrops.dynamictrees.core.persistence.TreeCatchUp;
+import mod.gottsch.forge.evercrops.dynamictrees.core.persistence.TreeRegistry;
+import mod.gottsch.forge.evercrops.dynamictrees.core.persistence.TreeSavedData;
+import mod.gottsch.forge.evercrops.dynamictrees.core.persistence.TreeState;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -141,7 +141,7 @@ public class EverCropsDTCommand {
                     BlockPos pos = origin.offset(dx, dy, dz);
                     BlockState blockState = level.getBlockState(pos);
 
-                    if (blockState.getBlock() instanceof SoilBlock) {
+                    if (blockState.getBlock() instanceof RootyBlock) {
                         if (TreeRegistry.get(level, pos).isPresent()) {
                             alreadyTracked++;
                         } else {
@@ -306,10 +306,10 @@ public class EverCropsDTCommand {
         final String blockDesc;
         final ChatFormatting blockColor;
         final Integer fertility;
-        if (blockState.getBlock() instanceof SoilBlock) {
-            int f = blockState.getValue(SoilBlock.FERTILITY);
+        if (blockState.getBlock() instanceof RootyBlock) {
+            int f = blockState.getValue(RootyBlock.FERTILITY);
             fertility = f;
-            blockDesc = "SoilBlock, fertility: " + f + "/15";
+            blockDesc = "RootyBlock, fertility: " + f + "/15";
             blockColor = f == 0 ? ChatFormatting.RED
                        : f < 4  ? ChatFormatting.GOLD
                        :          ChatFormatting.WHITE;

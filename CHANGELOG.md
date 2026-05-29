@@ -1,4 +1,4 @@
-# Changelog for EverCrops: Dynamic Trees (NeoForge 1.21.1)
+# Changelog for EverCrops: Dynamic Trees (Forge 1.20.1)
 
 All notable changes to this project will be documented in this file.
 

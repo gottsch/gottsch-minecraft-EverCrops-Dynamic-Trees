@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with EverCrops: Dynamic Trees.  If not, see <http://www.gnu.org/licenses/lgpl>.
  */
-package mod.gottsch.neo.evercrops.dynamictrees.core.persistence;
+package mod.gottsch.forge.evercrops.dynamictrees.core.persistence;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;

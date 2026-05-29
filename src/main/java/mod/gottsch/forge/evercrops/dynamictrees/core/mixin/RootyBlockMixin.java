@@ -15,15 +15,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with EverCrops: Dynamic Trees.  If not, see <http://www.gnu.org/licenses/lgpl>.
  */
-package mod.gottsch.neo.evercrops.dynamictrees.core.mixin;
+package mod.gottsch.forge.evercrops.dynamictrees.core.mixin;
 
-import com.dtteam.dynamictrees.block.soil.SoilBlock;
-import com.dtteam.dynamictrees.tree.ChunkTreeHelper;
-import mod.gottsch.neo.evercrops.dynamictrees.EverCropsDT;
-import mod.gottsch.neo.evercrops.dynamictrees.core.config.Config;
-import mod.gottsch.neo.evercrops.dynamictrees.core.persistence.TreeCatchUp;
-import mod.gottsch.neo.evercrops.dynamictrees.core.persistence.TreeRegistry;
-import mod.gottsch.neo.evercrops.dynamictrees.core.persistence.TreeState;
+import com.ferreusveritas.dynamictrees.block.rooty.RootyBlock;
+import com.ferreusveritas.dynamictrees.util.CoordUtils;
+import mod.gottsch.forge.evercrops.dynamictrees.EverCropsDT;
+import mod.gottsch.forge.evercrops.dynamictrees.core.config.Config;
+import mod.gottsch.forge.evercrops.dynamictrees.core.persistence.TreeCatchUp;
+import mod.gottsch.forge.evercrops.dynamictrees.core.persistence.TreeRegistry;
+import mod.gottsch.forge.evercrops.dynamictrees.core.persistence.TreeState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.Optional;
 
 /**
- * Injects offline catch-up growth into Dynamic Trees' SoilBlock.randomTick.
+ * Injects offline catch-up growth into Dynamic Trees' RootyBlock.randomTick.
  *
  * Algorithm (single HEAD inject; no RETURN inject needed):
  *
@@ -52,17 +52,17 @@ import java.util.Optional;
  *    No catch-up; natural tick runs.
  *
  * 4. Post-reload with enough elapsed time: compute missed growth steps, loop
- *    SoilBlock.updateTree(…, natural=false) N times (false suppresses disease
+ *    RootyBlock.updateTree(…, natural=false) N times (false suppresses disease
  *    checks and voluntary drops that are inappropriate for simulated catch-up),
  *    then cancel the natural tick so we don't apply N+1 steps.
  *
  * No light gating — Dynamic Trees manages all light and condition checks
- * internally inside SoilBlock.updateTree() → Species.update().
+ * internally inside RootyBlock.updateTree() → Species.update().
  *
  * @author Mark Gottschling on 2026-05-27
  */
-@Mixin(SoilBlock.class)
-public class SoilBlockMixin {
+@Mixin(RootyBlock.class)
+public class RootyBlockMixin {
 
     @Inject(method = "randomTick", at = @At("HEAD"), cancellable = true)
     private void everCropsDT_randomTick(BlockState state, ServerLevel level,
@@ -70,15 +70,15 @@ public class SoilBlockMixin {
                                         CallbackInfo ci) {
         if (!Config.SERVER.catchUpEnabled.get()) return;
 
-        // DT's SoilBlock.updateTree silently no-ops unless the soil's chunk AND all
-        // eight neighbours are entity-ticking (ChunkTreeHelper.isSurroundedByLoadedChunks).
+        // DT's RootyBlock.updateTree silently no-ops unless the soil's chunk AND all
+        // eight neighbours are entity-ticking (CoordUtils.isSurroundedByLoadedChunks).
         // This is commonly false in the first ticks after a chunk reloads — exactly when
         // our mixin fires. If we delivered catch-up steps now they would be consumed for
         // zero growth and the elapsed time would be lost. Defer instead: let the natural
         // tick run (which DT also no-ops) and don't touch the timestamps. beginCatchUp
         // will compute the full elapsed delta on a later tick once the chunks are live.
-        if (!ChunkTreeHelper.isSurroundedByLoadedChunks(level, pos)) {
-            EverCropsDT.LOGGER.debug("SoilBlockMixin: chunks not fully loaded at {}; deferring catch-up", pos);
+        if (!CoordUtils.isSurroundedByLoadedChunks(level, pos)) {
+            EverCropsDT.LOGGER.debug("RootyBlockMixin: chunks not fully loaded at {}; deferring catch-up", pos);
             return;
         }
 
@@ -93,16 +93,16 @@ public class SoilBlockMixin {
         int steps = TreeCatchUp.beginCatchUp(level, treeState);
 
         if (steps > 0) {
-            EverCropsDT.LOGGER.debug("SoilBlockMixin: catch-up {} steps at {}", steps, pos);
+            EverCropsDT.LOGGER.debug("RootyBlockMixin: catch-up {} steps at {}", steps, pos);
 
-            SoilBlock self = (SoilBlock)(Object) this;
+            RootyBlock self = (RootyBlock)(Object) this;
             for (int i = 0; i < steps; i++) {
                 // Re-read state each iteration — updateTree may transition the block.
                 BlockState current = level.getBlockState(pos);
-                if (!(current.getBlock() instanceof SoilBlock)) {
-                    // Soil block was replaced during catch-up (e.g. tree fully grown and
+                if (!(current.getBlock() instanceof RootyBlock)) {
+                    // Rooty soil was replaced during catch-up (e.g. tree fully grown and
                     // soil decayed); stop and clean up the registry entry.
-                    EverCropsDT.LOGGER.debug("SoilBlockMixin: soil replaced at {} after {} steps; removing entry", pos, i);
+                    EverCropsDT.LOGGER.debug("RootyBlockMixin: soil replaced at {} after {} steps; removing entry", pos, i);
                     TreeRegistry.remove(level, pos);
                     ci.cancel();
                     return;

@@ -15,11 +15,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with EverCrops: Dynamic Trees.  If not, see <http://www.gnu.org/licenses/lgpl>.
  */
-package mod.gottsch.neo.evercrops.dynamictrees.core.config;
+package mod.gottsch.forge.evercrops.dynamictrees.core.config;
 
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.config.ModConfig;
-import net.neoforged.neoforge.common.ModConfigSpec;
+import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.config.ModConfig;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -34,33 +34,33 @@ import org.apache.commons.lang3.tuple.Pair;
  */
 public class Config {
 
-    public static final ModConfigSpec SERVER_SPEC;
+    public static final ForgeConfigSpec SERVER_SPEC;
     public static final ServerConfig SERVER;
 
     static {
-        final Pair<ServerConfig, ModConfigSpec> serverPair =
-                new ModConfigSpec.Builder().configure(ServerConfig::new);
+        final Pair<ServerConfig, ForgeConfigSpec> serverPair =
+                new ForgeConfigSpec.Builder().configure(ServerConfig::new);
         SERVER_SPEC = serverPair.getRight();
         SERVER      = serverPair.getLeft();
     }
 
     private Config() {}
 
-    public static void register(ModContainer modContainer) {
-        modContainer.registerConfig(ModConfig.Type.SERVER, SERVER_SPEC);
+    public static void register() {
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SERVER_SPEC);
     }
 
     // -----------------------------------------------------------------------
 
     public static class ServerConfig {
 
-        public final ModConfigSpec.BooleanValue catchUpEnabled;
-        public final ModConfigSpec.IntValue     avgGrowthTickInterval;
-        public final ModConfigSpec.BooleanValue saplingsEnabled;
-        public final ModConfigSpec.BooleanValue autoCleanupEnabled;
-        public final ModConfigSpec.IntValue     autoCleanupIntervalTicks;
+        public final ForgeConfigSpec.BooleanValue catchUpEnabled;
+        public final ForgeConfigSpec.IntValue     avgGrowthTickInterval;
+        public final ForgeConfigSpec.BooleanValue saplingsEnabled;
+        public final ForgeConfigSpec.BooleanValue autoCleanupEnabled;
+        public final ForgeConfigSpec.IntValue     autoCleanupIntervalTicks;
 
-        public ServerConfig(ModConfigSpec.Builder builder) {
+        public ServerConfig(ForgeConfigSpec.Builder builder) {
             builder.comment("EverCrops: Dynamic Trees catch-up settings").push("trees");
 
             catchUpEnabled = builder

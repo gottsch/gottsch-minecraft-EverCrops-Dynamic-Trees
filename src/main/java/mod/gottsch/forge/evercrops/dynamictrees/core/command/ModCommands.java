@@ -15,19 +15,19 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with EverCrops: Dynamic Trees.  If not, see <http://www.gnu.org/licenses/lgpl>.
  */
-package mod.gottsch.neo.evercrops.dynamictrees.core.command;
+package mod.gottsch.forge.evercrops.dynamictrees.core.command;
 
-import mod.gottsch.neo.evercrops.dynamictrees.EverCropsDT;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import mod.gottsch.forge.evercrops.dynamictrees.EverCropsDT;
+import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 /**
  * Registers EverCrops: Dynamic Trees commands on the game event bus.
  *
  * @author Mark Gottschling on 2026-05-27
  */
-@EventBusSubscriber(modid = EverCropsDT.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
+@Mod.EventBusSubscriber(modid = EverCropsDT.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ModCommands {
 
     @SubscribeEvent
