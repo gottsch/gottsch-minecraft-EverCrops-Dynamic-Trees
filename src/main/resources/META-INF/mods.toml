@@ -32,12 +32,12 @@ description='''${mod_description}'''
     modId="evercrops"
     mandatory=true
     versionRange="${evercrops_version_range}"
-    ordering="BEFORE"
+    ordering="AFTER"
     side="BOTH"
 
 [[dependencies.${mod_id}]]
     modId="dynamictrees"
     mandatory=true
     versionRange="${dt_version_range}"
-    ordering="BEFORE"
+    ordering="AFTER"
     side="BOTH"

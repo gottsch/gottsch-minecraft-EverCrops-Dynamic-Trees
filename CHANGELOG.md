@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.0.1] - 2026-06-06
+
+### Fixed
+
+- Fixed the add-on loading in the wrong order, which could make the game crash when certain other mods were installed. It now loads after Dynamic Trees and EverCrops, the way it always should have.
+
 ## [1.0.0] - 2026-5-27
 
 ### Added
