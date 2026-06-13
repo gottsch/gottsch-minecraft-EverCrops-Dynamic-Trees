@@ -102,6 +102,16 @@ mixin {
     }
 }
 
+// The Mixin annotation processor writes the refmap to build/tmp/compileJava/, which is NOT a
+// tracked task output. With org.gradle.caching=true, a compileJava restored FROM-CACHE skips the
+// AP entirely, so the refmap is never regenerated and addMixinsToJar bundles a refmap-less jar.
+// At runtime that produces "No refMap loaded" and mixins fail to apply. Opt compileJava out of
+// the build cache so the AP always runs and the refmap is regenerated on every clean build.
+// (Incremental UP-TO-DATE behavior is unaffected; only cache store/restore is disabled.)
+tasks.named('compileJava') {
+    outputs.cacheIf { false }
+}
+
 // This block of code expands all declared replace properties in the specified resource targets.
 // A missing property will result in an error. Properties are expanded using ${} Groovy notation.
 // When "copyIdeResources" is enabled, this will also run before the game launches in IDE environments.
