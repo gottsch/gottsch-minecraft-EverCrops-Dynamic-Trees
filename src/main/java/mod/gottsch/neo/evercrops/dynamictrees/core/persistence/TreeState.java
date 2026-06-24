@@ -17,67 +17,36 @@
  */
 package mod.gottsch.neo.evercrops.dynamictrees.core.persistence;
 
-import java.util.Objects;
+import mod.gottsch.forge.evercrops.api.CatchUpState;
 
 /**
- * Per-tree catch-up tracking state. Stored once per SoilBlock position.
+ * Per-tree catch-up tracking state, stored once per soil-block position.
  *
- * No light fields — Dynamic Trees manages all light and condition checks
- * internally inside SoilBlock.updateTree().
- *
- * This is a plain POJO with no Minecraft or loader imports, keeping it
- * trivially portable across loader versions.
+ * <p>A thin extension of EverCrops' shared {@link CatchUpState} (v4 API): the two base timestamps
+ * are all trees need — no light fields, since Dynamic Trees manages all light and condition checks
+ * internally inside its own growth pass. Kept as a named subclass for the convenience constructor
+ * and so the registry / SavedData code reads in tree terms.
  *
  * @author Mark Gottschling on 2026-05-27
  */
-public class TreeState {
-
-    private long lastCallGameTime;
-    private long lastGrowthGameTime;
+public class TreeState extends CatchUpState {
 
     public TreeState() {}
 
     public TreeState(long gameTime) {
-        this.lastCallGameTime = gameTime;
-        this.lastGrowthGameTime = gameTime;
+        setLastCallGameTime(gameTime);
+        setLastGrowthGameTime(gameTime);
     }
 
-    public long getLastCallGameTime() {
-        return lastCallGameTime;
-    }
-
+    @Override
     public TreeState setLastCallGameTime(long lastCallGameTime) {
-        this.lastCallGameTime = lastCallGameTime;
+        super.setLastCallGameTime(lastCallGameTime);
         return this;
     }
 
-    public long getLastGrowthGameTime() {
-        return lastGrowthGameTime;
-    }
-
+    @Override
     public TreeState setLastGrowthGameTime(long lastGrowthGameTime) {
-        this.lastGrowthGameTime = lastGrowthGameTime;
+        super.setLastGrowthGameTime(lastGrowthGameTime);
         return this;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        TreeState treeState = (TreeState) o;
-        return lastCallGameTime == treeState.lastCallGameTime
-                && lastGrowthGameTime == treeState.lastGrowthGameTime;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(lastCallGameTime, lastGrowthGameTime);
-    }
-
-    @Override
-    public String toString() {
-        return "TreeState{" +
-                "lastCallGameTime=" + lastCallGameTime +
-                ", lastGrowthGameTime=" + lastGrowthGameTime +
-                '}';
     }
 }

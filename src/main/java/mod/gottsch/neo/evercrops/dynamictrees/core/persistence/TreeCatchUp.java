@@ -17,26 +17,22 @@
  */
 package mod.gottsch.neo.evercrops.dynamictrees.core.persistence;
 
+import mod.gottsch.forge.evercrops.api.CatchUpDecision;
 import mod.gottsch.neo.evercrops.dynamictrees.core.config.Config;
 import net.minecraft.server.level.ServerLevel;
 
 /**
- * Shared catch-up timing logic for Dynamic Trees soil blocks.
+ * Dynamic-Trees-facing facade over EverCrops' shared catch-up engine.
  *
- * Two-threshold algorithm (mirrors EverCrops CropCatchUp):
- *   - If the call delta is below 2× AVG_CALL_TICK_INTERVAL, the chunk was never
- *     really unloaded — refresh BOTH timestamps so that growthDelta stays calibrated
- *     with the loaded tick rate and never grows stale.
- *   - If the growth delta is below 2× AVG_GROWTH_TICK_INTERVAL, not enough time
- *     has passed since the last growth — no catch-up needed yet.
- *   - Otherwise, compute how many growth steps were missed.
+ * The two-threshold timing algorithm now lives once in
+ * {@link mod.gottsch.forge.evercrops.api.CatchUpDecision#computeStepsUnlit} (v4 API); this class
+ * just supplies the tree-specific inputs: DT's per-call interval and the configured growth
+ * interval. No light gating — Dynamic Trees manages all light and condition checks internally
+ * inside its own growth pass.
  *
- * No light gating — Dynamic Trees manages all light and condition checks
- * internally inside SoilBlock.updateTree().
- *
- * AVG_GROWTH_TICK_INTERVAL is read from config on every call so that server
- * admins can adjust it without restarting. It should be tuned to match DT's
- * treeGrowthMultiplier:  interval ≈ 1365 / min(multiplier, 1.0).
+ * The growth interval is read from config on every call so that server admins can adjust it
+ * without restarting. It should be tuned to match DT's treeGrowthMultiplier:
+ * interval ≈ 1365 / min(multiplier, 1.0).
  *
  * @author Mark Gottschling on 2026-05-27
  */
@@ -58,31 +54,8 @@ public final class TreeCatchUp {
      * @return number of growth steps to apply (0 if no catch-up this tick)
      */
     public static int beginCatchUp(ServerLevel level, TreeState treeState) {
-        long now = level.getGameTime();
-        int avgGrowthInterval = Config.SERVER.avgGrowthTickInterval.get();
-
-        long callDelta = now - treeState.getLastCallGameTime();
-        if (callDelta <= AVG_CALL_TICK_INTERVAL * 2L) {
-            // Chunk was never really unloaded; keep BOTH timestamps current so that
-            // growthDelta correctly reflects only the actual offline period on the next
-            // reload, rather than also accumulating loaded idle time.
-            treeState.setLastCallGameTime(now)
-                     .setLastGrowthGameTime(now);
-            return 0;
-        }
-
-        long growthDelta = now - treeState.getLastGrowthGameTime();
-        if (growthDelta <= avgGrowthInterval * 2L) {
-            // Not enough time has elapsed since last growth; no catch-up yet.
-            // Leave timestamps untouched (mirrors EverCrops between-threshold behaviour).
-            return 0;
-        }
-
-        int quotient = (int) Math.floor((double) growthDelta / avgGrowthInterval);
-        long remainder = growthDelta % avgGrowthInterval;
-        treeState.setLastGrowthGameTime(now - remainder)
-                 .setLastCallGameTime(now);
-        return quotient;
+        return CatchUpDecision.computeStepsUnlit(treeState, level.getGameTime(),
+                AVG_CALL_TICK_INTERVAL, Config.SERVER.avgGrowthTickInterval.get());
     }
 
     /**
