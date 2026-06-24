@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [2.0.0] - 2026-06-23
+
+### Changed
+
+- Now requires EverCrops 4.0.0 or newer.
+- Rebuilt on EverCrops 4.0.0's new shared add-on system. No change to how your trees grow.
+
+### Fixed
+
+- A tree that has just grown from a sapling now starts keeping up with its growth right away, instead of after a short delay.
+
 ## [1.0.2] - 2026-06-13
 
 ### Fixed
