@@ -34,6 +34,7 @@ public class TreeState {
 
     private long lastCallGameTime;
     private long lastGrowthGameTime;
+    private int consecutiveDeadFertilityCount;
 
     public TreeState() {}
 
@@ -60,17 +61,28 @@ public class TreeState {
         return this;
     }
 
+    /** Consecutive randomTick checks this tree has reported fertility 0. Reset to 0 once fertility > 0. */
+    public int getConsecutiveDeadFertilityCount() {
+        return consecutiveDeadFertilityCount;
+    }
+
+    public TreeState setConsecutiveDeadFertilityCount(int consecutiveDeadFertilityCount) {
+        this.consecutiveDeadFertilityCount = consecutiveDeadFertilityCount;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         TreeState treeState = (TreeState) o;
         return lastCallGameTime == treeState.lastCallGameTime
-                && lastGrowthGameTime == treeState.lastGrowthGameTime;
+                && lastGrowthGameTime == treeState.lastGrowthGameTime
+                && consecutiveDeadFertilityCount == treeState.consecutiveDeadFertilityCount;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(lastCallGameTime, lastGrowthGameTime);
+        return Objects.hash(lastCallGameTime, lastGrowthGameTime, consecutiveDeadFertilityCount);
     }
 
     @Override
@@ -78,6 +90,7 @@ public class TreeState {
         return "TreeState{" +
                 "lastCallGameTime=" + lastCallGameTime +
                 ", lastGrowthGameTime=" + lastGrowthGameTime +
+                ", consecutiveDeadFertilityCount=" + consecutiveDeadFertilityCount +
                 '}';
     }
 }

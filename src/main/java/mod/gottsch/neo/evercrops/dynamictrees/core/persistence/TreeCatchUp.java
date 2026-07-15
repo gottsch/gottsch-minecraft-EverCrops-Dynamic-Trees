@@ -53,9 +53,16 @@ public final class TreeCatchUp {
      * as a side effect; the caller is responsible for performing the actual
      * block updates and persisting the state via {@link TreeRegistry#put}.
      *
+     * The raw quotient is uncapped — a tree left untouched for a very long time can
+     * accumulate a huge step count, and applying all of it synchronously in one tick
+     * risks a lag spike (worse when several stale trees load at once, e.g. flying
+     * fast through terrain). {@code maxCatchUpStepsPerEvent} bounds the work done in
+     * a single call; any remainder is pushed back onto {@code lastGrowthGameTime} so
+     * it is picked up on a later randomTick instead of being lost.
+     *
      * @param level     the server level (used for current game time only)
      * @param treeState tracked state for this soil block position (mutated in place)
-     * @return number of growth steps to apply (0 if no catch-up this tick)
+     * @return number of growth steps to apply this call (0 if no catch-up this tick)
      */
     public static int beginCatchUp(ServerLevel level, TreeState treeState) {
         long now = level.getGameTime();
@@ -82,6 +89,14 @@ public final class TreeCatchUp {
         long remainder = growthDelta % avgGrowthInterval;
         treeState.setLastGrowthGameTime(now - remainder)
                  .setLastCallGameTime(now);
+
+        int maxSteps = Config.SERVER.maxCatchUpStepsPerEvent.get();
+        if (quotient > maxSteps) {
+            int deferredSteps = quotient - maxSteps;
+            treeState.setLastGrowthGameTime(
+                    treeState.getLastGrowthGameTime() - (long) deferredSteps * avgGrowthInterval);
+            quotient = maxSteps;
+        }
         return quotient;
     }
 
