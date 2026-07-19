@@ -22,25 +22,25 @@ config="${mod_id}.mixins.json"
     type="required"
     versionRange="${neo_version_range}"
     ordering="NONE"
-    side="BOTH"
+    side="SERVER"
 
 [[dependencies.${mod_id}]]
     modId="minecraft"
     type="required"
     versionRange="${minecraft_version_range}"
     ordering="NONE"
-    side="BOTH"
+    side="SERVER"
 
 [[dependencies.${mod_id}]]
     modId="evercrops"
     type="required"
     versionRange="${evercrops_version_range}"
     ordering="AFTER"
-    side="BOTH"
+    side="SERVER"
 
 [[dependencies.${mod_id}]]
     modId="dynamictrees"
     type="required"
     versionRange="${dt_version_range}"
     ordering="AFTER"
-    side="BOTH"
+    side="SERVER"

@@ -18,6 +18,7 @@
 package mod.gottsch.neo.evercrops.dynamictrees.core.mixin;
 
 import com.dtteam.dynamictrees.block.sapling.DynamicSaplingBlock;
+import com.dtteam.dynamictrees.block.soil.SoilBlock;
 import mod.gottsch.neo.evercrops.dynamictrees.EverCropsDT;
 import mod.gottsch.neo.evercrops.dynamictrees.core.config.Config;
 import mod.gottsch.neo.evercrops.dynamictrees.core.persistence.TreeCatchUp;
@@ -28,6 +29,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -48,8 +50,9 @@ import java.util.Optional;
  * - We loop up to min(steps, MAX_ATTEMPTS) times so that any random gate inside
  *   canSaplingGrow has multiple chances to succeed per catch-up event.
  * - When the block transitions (DynamicSaplingBlock replaced by tree structure),
- *   the sapling registry entry is removed; the new SoilBlock self-registers on
- *   its own first randomTick via SoilBlockMixin.
+ *   the sapling registry entry is removed and the new rooty SoilBlock that DT placed
+ *   directly below is registered immediately, so the young tree is tracked without
+ *   waiting for the soil's first random tick (SoilBlockMixin remains a fallback).
  *
  * @author Mark Gottschling on 2026-05-27
  */
@@ -86,11 +89,11 @@ public class SaplingBlockMixin {
                 // replaced the block (canSurvive failed → dropBlock, or tree grew).
                 BlockState current = level.getBlockState(pos);
                 if (!(current.getBlock() instanceof DynamicSaplingBlock)) {
-                    // Sapling transitioned or was dropped.  Clean up the registry entry;
-                    // the new SoilBlock (if any) will self-register via SoilBlockMixin.
+                    // Sapling transitioned to a tree (or was dropped). Drop the sapling entry and
+                    // register the new soil below so the tree is tracked right away.
                     EverCropsDT.LOGGER.debug(
-                            "SaplingBlockMixin: sapling gone at {} after {} attempt(s); removing entry", pos, i);
-                    TreeRegistry.remove(level, pos);
+                            "SaplingBlockMixin: sapling gone at {} after {} attempt(s)", pos, i);
+                    everCropsDT_onSaplingGone(level, pos);
                     ci.cancel();
                     return;
                 }
@@ -100,7 +103,7 @@ public class SaplingBlockMixin {
             // All attempts made; sapling may or may not have grown.
             // Check one final time in case the last performBonemeal succeeded.
             if (!(level.getBlockState(pos).getBlock() instanceof DynamicSaplingBlock)) {
-                TreeRegistry.remove(level, pos);
+                everCropsDT_onSaplingGone(level, pos);
                 ci.cancel();
                 return;
             }
@@ -112,6 +115,24 @@ public class SaplingBlockMixin {
         } else {
             // No catch-up needed; persist refreshed timestamps and let natural tick run.
             TreeRegistry.put(level, pos, treeState);
+        }
+    }
+
+    /**
+     * Hand-off when a tracked sapling has just become a tree: drop the sapling's own entry and,
+     * if DT placed a rooty {@link SoilBlock} directly below the old sapling position, register it
+     * immediately (fresh timestamps — no retroactive burst). This makes the young tree trackable
+     * at once instead of waiting for the soil's first random tick; SoilBlockMixin still covers any
+     * case where the soil isn't directly below.
+     */
+    @Unique
+    private static void everCropsDT_onSaplingGone(ServerLevel level, BlockPos pos) {
+        TreeRegistry.remove(level, pos);
+        BlockPos soilPos = pos.below();
+        if (level.getBlockState(soilPos).getBlock() instanceof SoilBlock
+                && TreeRegistry.get(level, soilPos).isEmpty()) {
+            TreeRegistry.put(level, soilPos, TreeCatchUp.createState(level));
+            EverCropsDT.LOGGER.debug("SaplingBlockMixin: auto-registered new soil at {}", soilPos);
         }
     }
 }

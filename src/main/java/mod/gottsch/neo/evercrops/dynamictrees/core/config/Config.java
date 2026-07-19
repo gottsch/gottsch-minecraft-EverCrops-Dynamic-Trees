@@ -56,9 +56,11 @@ public class Config {
 
         public final ModConfigSpec.BooleanValue catchUpEnabled;
         public final ModConfigSpec.IntValue     avgGrowthTickInterval;
+        public final ModConfigSpec.IntValue     maxCatchUpStepsPerEvent;
         public final ModConfigSpec.BooleanValue saplingsEnabled;
         public final ModConfigSpec.BooleanValue autoCleanupEnabled;
         public final ModConfigSpec.IntValue     autoCleanupIntervalTicks;
+        public final ModConfigSpec.IntValue     deadFertilityCleanupThreshold;
 
         public ServerConfig(ModConfigSpec.Builder builder) {
             builder.comment("EverCrops: Dynamic Trees catch-up settings").push("trees");
@@ -78,6 +80,15 @@ public class Config {
                              "Increase this value if trees grow too fast during catch-up; decrease " +
                              "to make catch-up more aggressive. Also used as the sapling growth interval.")
                     .defineInRange("avgGrowthTickInterval", 1500, 100, 1_000_000);
+
+            maxCatchUpStepsPerEvent = builder
+                    .comment("Maximum number of growth steps applied to a single tree in one catch-up " +
+                             "event. A tree left untouched for a very long time can accumulate a huge " +
+                             "step count; applying them all synchronously in one tick can cause a lag " +
+                             "spike (especially when several stale trees load at once, e.g. flying fast " +
+                             "through terrain). Any steps beyond this cap are deferred and applied on a " +
+                             "later randomTick instead of being lost.")
+                    .defineInRange("maxCatchUpStepsPerEvent", 100, 1, 100_000);
 
             saplingsEnabled = builder
                     .comment("Enable offline catch-up for DynamicSaplingBlocks. " +
@@ -102,6 +113,17 @@ public class Config {
                              "1200 = 1 minute, 36000 = 30 minutes, 72000 = 60 minutes. " +
                              "The scan only touches loaded chunks, so it is cheap at typical values.")
                     .defineInRange("autoCleanupIntervalTicks", 36_000, 1_200, 288_000);
+
+            deadFertilityCleanupThreshold = builder
+                    .comment("Number of consecutive randomTick checks a tracked tree may report " +
+                             "fertility 0 before its registry entry is removed. Fertility 0 means DT " +
+                             "will not grow the tree at all, so continuing to track it (and compute " +
+                             "catch-up math for it on every randomTick) is wasted work — this is the " +
+                             "main cost for large numbers of untouched wild/naturally-generated trees. " +
+                             "If fertility later recovers (e.g. bonemeal), the tree is re-registered " +
+                             "automatically on its next randomTick, same as a tree the mod has never " +
+                             "seen before.")
+                    .defineInRange("deadFertilityCleanupThreshold", 3, 1, 100);
 
             builder.pop();
         }
