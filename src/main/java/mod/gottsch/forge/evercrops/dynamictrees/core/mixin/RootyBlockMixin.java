@@ -90,6 +90,29 @@ public class RootyBlockMixin {
         }
 
         TreeState treeState = existing.get();
+
+        // Fertility 0 means DT will not grow this tree at all (Species.grow bails out
+        // immediately), so continuing to track it — and computing catch-up math for it on
+        // every randomTick forever — is wasted work. This is the main registry-bloat cost for
+        // the large numbers of untouched wild/naturally-generated trees a player flies past.
+        // Only drop the entry after several consecutive dead checks, in case fertility is
+        // fluctuating right at the boundary. If fertility later recovers, the tree is
+        // re-registered automatically on its next randomTick (first-encounter path above).
+        int fertility = state.getValue(RootyBlock.FERTILITY);
+        if (fertility == 0) {
+            int deadCount = treeState.getConsecutiveDeadFertilityCount() + 1;
+            if (deadCount >= Config.SERVER.deadFertilityCleanupThreshold.get()) {
+                EverCropsDT.LOGGER.debug(
+                        "RootyBlockMixin: fertility 0 for {} consecutive checks at {}; removing entry",
+                        deadCount, pos);
+                TreeRegistry.remove(level, pos);
+                return; // let natural tick run; nothing left to catch up
+            }
+            treeState.setConsecutiveDeadFertilityCount(deadCount);
+        } else if (treeState.getConsecutiveDeadFertilityCount() != 0) {
+            treeState.setConsecutiveDeadFertilityCount(0);
+        }
+
         int steps = TreeCatchUp.beginCatchUp(level, treeState);
 
         if (steps > 0) {
