@@ -6,27 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [2.0.0] - 2026-06-23
+## [2.0.0] - 2026-07-15
 
 ### Changed
 
 - Now requires EverCrops 4.0.0 or newer.
 - Rebuilt on EverCrops 4.0.0's new shared add-on system. No change to how your trees grow.
+- This add-on no longer needs to be installed on the client — only the server (or singleplayer world) needs it. Players can now join a server that has this add-on without installing it themselves.
 
 ### Fixed
 
 - A tree that has just grown from a sapling now starts keeping up with its growth right away, instead of after a short delay.
-
-## [1.0.1] - 2026-06-06
-
-### Fixed
-
-- Fixed the add-on loading in the wrong order, which could make the game crash when certain other mods were installed. It now loads after Dynamic Trees and EverCrops, the way it always should have.
-
-## [2.0.0] - 2026-07-15
-
-### Fixed
-
 - Fixed a lag spike that could happen when moving through the world quickly, especially over long-untouched or freshly explored land. A tree left alone for a very long time used to try to catch up on all its missed growth in one single burst, which could momentarily freeze the game. Catch-up growth is now spread out over multiple visits instead of happening all at once.
 - Trees whose soil has lost all its fertility (and so can never grow again) are no longer tracked forever. The mod now stops keeping tabs on them after a few checks, keeping things lighter in worlds with a lot of untouched natural forest. If the soil becomes fertile again, tracking picks back up automatically.
 
@@ -34,6 +24,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - A setting for server owners to control how much catch-up growth is allowed to happen at once.
 - A setting for server owners to control how quickly a tree that can no longer grow gets forgotten.
+
+---
+
+## [1.0.1] - 2026-06-06
+
+### Fixed
+
+- Fixed the add-on loading in the wrong order, which could make the game crash when certain other mods were installed. It now loads after Dynamic Trees and EverCrops, the way it always should have.
 
 ## [1.0.0] - 2026-5-27
 
