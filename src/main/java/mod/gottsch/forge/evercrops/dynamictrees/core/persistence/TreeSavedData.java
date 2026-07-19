@@ -74,7 +74,8 @@ public class TreeSavedData extends SavedData {
             long posKey = entry.getLong("pos");
             TreeState state = new TreeState();
             state.setLastCallGameTime(entry.getLong("lastCallTime"))
-                 .setLastGrowthGameTime(entry.getLong("lastGrowthTime"));
+                 .setLastGrowthGameTime(entry.getLong("lastGrowthTime"))
+                 .setConsecutiveDeadFertilityCount(entry.getInt("deadFertilityCount"));
             data.trees.put(posKey, state);
         }
         return data;
@@ -89,6 +90,7 @@ public class TreeSavedData extends SavedData {
             TreeState s = entry.getValue();
             e.putLong("lastCallTime", s.getLastCallGameTime());
             e.putLong("lastGrowthTime", s.getLastGrowthGameTime());
+            e.putInt("deadFertilityCount", s.getConsecutiveDeadFertilityCount());
             list.add(e);
         }
         tag.put("trees", list);

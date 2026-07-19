@@ -31,6 +31,8 @@ import mod.gottsch.forge.evercrops.api.CatchUpState;
  */
 public class TreeState extends CatchUpState {
 
+    private int consecutiveDeadFertilityCount;
+
     public TreeState() {}
 
     public TreeState(long gameTime) {
@@ -47,6 +49,16 @@ public class TreeState extends CatchUpState {
     @Override
     public TreeState setLastGrowthGameTime(long lastGrowthGameTime) {
         super.setLastGrowthGameTime(lastGrowthGameTime);
+        return this;
+    }
+
+    /** Consecutive randomTick checks this tree has reported fertility 0. Reset to 0 once fertility > 0. */
+    public int getConsecutiveDeadFertilityCount() {
+        return consecutiveDeadFertilityCount;
+    }
+
+    public TreeState setConsecutiveDeadFertilityCount(int consecutiveDeadFertilityCount) {
+        this.consecutiveDeadFertilityCount = consecutiveDeadFertilityCount;
         return this;
     }
 }
